@@ -6,12 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+  build-windows:
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -26,25 +22,13 @@ jobs:
       - name: Install dependencies
         run: npm ci || npm install
 
-      - name: Build (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Build Windows installer
         run: npm run build:win
 
-      - name: Build (macOS)
-        if: matrix.os == 'macos-latest'
-        run: npm run build:mac
-
-      - name: Build (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: npm run build:linux
-
-      - name: Upload artifacts
+      - name: Upload .exe artifact
         uses: actions/upload-artifact@v4
         with:
-          name: idle-quest-${{ matrix.os }}
-          path: |
-            dist/*.exe
-            dist/*.dmg
-            dist/*.AppImage
-          if-no-files-found: ignore
-          retention-days: 30
+          name: idle-quest-windows
+          path: dist/*.exe
+          if-no-files-found: error
+          retention-days: 90
