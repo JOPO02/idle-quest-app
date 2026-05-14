@@ -36,6 +36,23 @@ function createWindow() {
 
   Menu.setApplicationMenu(null);   // 기본 메뉴 제거 (디스코드처럼)
 
+  // Ctrl+R / F5 = 일반 새로고침, Ctrl+Shift+R = 캐시 무시 강제 새로고침
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown') return;
+    const ctrl = input.control || input.meta;
+    const isHardReload = ctrl && input.shift && input.key.toLowerCase() === 'r';
+    const isReload =
+      (ctrl && input.key.toLowerCase() === 'r') ||
+      input.key === 'F5';
+    if (isHardReload) {
+      mainWindow.webContents.reloadIgnoringCache();
+      event.preventDefault();
+    } else if (isReload) {
+      mainWindow.webContents.reload();
+      event.preventDefault();
+    }
+  });
+
   mainWindow.loadURL(GAME_URL);
 
   mainWindow.once('ready-to-show', () => {
@@ -64,6 +81,8 @@ function createTray() {
   tray.setToolTip('IDLE QUEST');
   const contextMenu = Menu.buildFromTemplate([
     { label: '게임 열기', click: () => { if (mainWindow) mainWindow.show(); } },
+    { label: '새로고침 (Ctrl+R)', accelerator: 'CmdOrCtrl+R',
+      click: () => { if (mainWindow) mainWindow.webContents.reload(); } },
     { label: '항상 위', type: 'checkbox', click: (item) => {
         if (mainWindow) mainWindow.setAlwaysOnTop(item.checked);
       }},
