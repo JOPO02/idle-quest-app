@@ -1,5 +1,9 @@
-const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, shell, dialog } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
+
+autoUpdater.autoDownload = true;
+autoUpdater.autoInstallOnAppQuit = true;
 
 const GAME_URL = process.env.GAME_URL || 'https://jopo.kr/g/moonrabbit';
 
@@ -64,6 +68,8 @@ function createTray() {
         if (mainWindow) mainWindow.setAlwaysOnTop(item.checked);
       }},
     { type: 'separator' },
+    { label: '업데이트 확인', click: () => checkForUpdatesManual() },
+    { type: 'separator' },
     { label: '종료', click: () => app.quit() }
   ]);
   tray.setContextMenu(contextMenu);
@@ -83,9 +89,58 @@ ipcMain.on('window-maximize', () => {
 ipcMain.on('window-close', () => mainWindow?.close());
 ipcMain.on('window-hide-to-tray', () => mainWindow?.hide());
 
+// ─── 자동 업데이트 (electron-updater + GitHub Releases) ───
+function setupAutoUpdater() {
+  autoUpdater.on('update-available', (info) => {
+    console.log('[updater] 새 버전 발견:', info.version);
+  });
+  autoUpdater.on('update-not-available', () => {
+    console.log('[updater] 최신 버전');
+  });
+  autoUpdater.on('error', (err) => {
+    console.error('[updater] 에러:', err);
+  });
+  autoUpdater.on('download-progress', (p) => {
+    console.log(`[updater] 다운로드 ${p.percent.toFixed(1)}% (${(p.bytesPerSecond / 1024).toFixed(0)} KB/s)`);
+  });
+  autoUpdater.on('update-downloaded', (info) => {
+    const result = dialog.showMessageBoxSync(mainWindow, {
+      type: 'info',
+      buttons: ['지금 재시작', '나중에'],
+      defaultId: 0,
+      title: 'IDLE QUEST 업데이트',
+      message: `새 버전 ${info.version} 다운로드 완료`,
+      detail: '재시작하면 자동 적용됩니다.',
+    });
+    if (result === 0) {
+      autoUpdater.quitAndInstall();
+    }
+  });
+  // 앱 시작 5초 후 1회 체크 + 이후 1시간마다
+  setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 5000);
+  setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), 60 * 60 * 1000);
+}
+
+function checkForUpdatesManual() {
+  autoUpdater.checkForUpdates()
+    .then((result) => {
+      if (!result || !result.updateInfo) return;
+      // update-available 또는 update-not-available 이벤트가 알아서 처리
+    })
+    .catch((err) => {
+      dialog.showMessageBox(mainWindow, {
+        type: 'error',
+        title: '업데이트 확인 실패',
+        message: '업데이트 서버에 연결할 수 없습니다.',
+        detail: String(err),
+      });
+    });
+}
+
 app.whenReady().then(() => {
   createWindow();
   createTray();
+  setupAutoUpdater();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });

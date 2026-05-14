@@ -1,6 +1,6 @@
 {
   "name": "idle-quest-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "IDLE QUEST 데스크탑 앱",
   "main": "main.js",
   "author": "JOPO",
@@ -10,7 +10,7 @@
     "dev": "electron . --enable-logging",
     "build": "electron-builder",
     "build:linux": "electron-builder --linux AppImage --publish never",
-    "build:win": "electron-builder --win nsis --publish never",
+    "build:win": "electron-builder --win nsis",
     "build:mac": "electron-builder --mac dmg --publish never"
   },
   "build": {
@@ -23,6 +23,11 @@
     ],
     "directories": {
       "output": "dist"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "JOPO02",
+      "repo": "idle-quest-app"
     },
     "win": {
       "target": "nsis",
@@ -38,6 +43,9 @@
       "icon": "assets/icon.png",
       "category": "public.app-category.games"
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
   },
   "devDependencies": {
     "electron": "^42.0.1",
