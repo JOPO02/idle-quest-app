@@ -3,9 +3,9 @@ const path = require('path');
 
 const GAME_URL = process.env.GAME_URL || 'https://jopo.kr/g/moonrabbit';
 
-// 디자인 캔버스 원본: iPhone 13 (390×844). 타이틀바 28px 더하면 872.
-const WIN_W = 390;
-const WIN_H = 872;
+// 작은 모바일 창 (사용자 선호). 타이틀바 18px 포함.
+const WIN_W = 360;
+const WIN_H = 720;
 
 let mainWindow = null;
 let tray = null;
@@ -14,11 +14,10 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: WIN_W,
     height: WIN_H,
-    minWidth: WIN_W,
-    minHeight: WIN_H,
-    maxWidth: WIN_W,
-    maxHeight: WIN_H,
-    resizable: false,
+    minWidth: 320,
+    minHeight: 560,
+    resizable: true,
+    useContentSize: true,
     frame: false,                  // 디스코드처럼 frameless
     titleBarStyle: 'hidden',
     backgroundColor: '#0A0A08',
