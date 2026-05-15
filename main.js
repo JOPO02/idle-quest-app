@@ -42,7 +42,8 @@ function createWindow() {
     const ctrl = input.control || input.meta;
     const isHardReload = ctrl && input.shift && input.key.toLowerCase() === 'r';
     const isReload = (ctrl && input.key.toLowerCase() === 'r') || input.key === 'F5';
-    const isDevTools = input.key === 'F12' || (ctrl && input.shift && input.key.toLowerCase() === 'i');
+    const isDevTools = input.key === 'F12' || input.code === 'F12'
+                       || (ctrl && input.shift && input.key.toLowerCase() === 'i');
     if (isHardReload) {
       mainWindow.webContents.reloadIgnoringCache();
       event.preventDefault();
@@ -101,6 +102,15 @@ function createTray() {
     { label: '게임 열기', click: () => { if (mainWindow) mainWindow.show(); } },
     { label: '새로고침 (Ctrl+R)', accelerator: 'CmdOrCtrl+R',
       click: () => { if (mainWindow) mainWindow.webContents.reload(); } },
+    { label: '개발자 도구 (F12)',
+      click: () => {
+        if (!mainWindow) return;
+        if (mainWindow.webContents.isDevToolsOpened()) {
+          mainWindow.webContents.closeDevTools();
+        } else {
+          mainWindow.webContents.openDevTools({ mode: 'detach' });
+        }
+      } },
     { label: '항상 위', type: 'checkbox', click: (item) => {
         if (mainWindow) mainWindow.setAlwaysOnTop(item.checked);
       }},
