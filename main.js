@@ -7,9 +7,9 @@ autoUpdater.autoInstallOnAppQuit = true;
 
 const GAME_URL = process.env.GAME_URL || 'https://jopo.kr/g/moonrabbit';
 
-// 작은 모바일 창 (사용자 선호). 타이틀바 18px 포함.
-const WIN_W = 360;
-const WIN_H = 720;
+// 원본 디자인 사이즈에 가깝게 (iPhone 13: 390×844, -44는 타이틀바/하단 여백)
+const WIN_W = 390;
+const WIN_H = 800;
 
 let mainWindow = null;
 let tray = null;
@@ -50,7 +50,12 @@ function createWindow() {
       mainWindow.webContents.reload();
       event.preventDefault();
     } else if (isDevTools) {
-      mainWindow.webContents.toggleDevTools();
+      // 별도 창으로 띄움 (작은 게임 화면 안 가림)
+      if (mainWindow.webContents.isDevToolsOpened()) {
+        mainWindow.webContents.closeDevTools();
+      } else {
+        mainWindow.webContents.openDevTools({ mode: 'detach' });
+      }
       event.preventDefault();
     }
   });
