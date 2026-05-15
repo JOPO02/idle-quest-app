@@ -1,6 +1,6 @@
 {
   "name": "idle-quest-app",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "IDLE QUEST 데스크탑 앱",
   "main": "main.js",
   "author": "JOPO",
@@ -10,7 +10,7 @@
     "dev": "electron . --enable-logging",
     "build": "electron-builder",
     "build:linux": "electron-builder --linux AppImage --publish never",
-    "build:win": "electron-builder --win nsis --publish always",
+    "build:win": "electron-builder --win nsis --publish never",
     "build:mac": "electron-builder --mac dmg --publish never"
   },
   "build": {

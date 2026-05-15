@@ -25,10 +25,24 @@ jobs:
       - name: Install dependencies
         run: npm ci || npm install
 
-      - name: Build Windows installer + publish to GitHub Releases
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Windows installer
         run: npm run build:win
+
+      - name: Read app version
+        id: ver
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release with .exe + latest.yml (auto-updater)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: v${{ steps.ver.outputs.version }}
+          files: |
+            dist/*.exe
+            dist/latest.yml
+            dist/*.blockmap
+          fail_on_unmatched_files: true
 
       - name: Upload .exe artifact (백업용)
         uses: actions/upload-artifact@v4
