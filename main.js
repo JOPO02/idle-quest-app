@@ -72,7 +72,14 @@ function createWindow() {
     setTimeout(() => { allowClose = true; mainWindow.close(); }, 1500);
   });
 
-  mainWindow.loadURL(GAME_URL);
+  // 시작 시 SW + 캐시 강제 비움 (옛 SW가 jsx 가로채던 문제 영구 해결)
+  const session = mainWindow.webContents.session;
+  Promise.all([
+    session.clearStorageData({ storages: ['serviceworkers'] }),
+    session.clearCache(),
+  ]).catch(() => {}).finally(() => {
+    mainWindow.loadURL(GAME_URL);
+  });
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();

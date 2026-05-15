@@ -1,6 +1,6 @@
 {
   "name": "idle-quest-app",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "IDLE QUEST 데스크탑 앱",
   "main": "main.js",
   "author": "JOPO",
