@@ -36,21 +36,34 @@ function createWindow() {
 
   Menu.setApplicationMenu(null);   // 기본 메뉴 제거 (디스코드처럼)
 
-  // Ctrl+R / F5 = 일반 새로고침, Ctrl+Shift+R = 캐시 무시 강제 새로고침
+  // 단축키: Ctrl+R / F5 = 새로고침, Ctrl+Shift+R = 강제 새로고침, F12 / Ctrl+Shift+I = DevTools
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.type !== 'keyDown') return;
     const ctrl = input.control || input.meta;
     const isHardReload = ctrl && input.shift && input.key.toLowerCase() === 'r';
-    const isReload =
-      (ctrl && input.key.toLowerCase() === 'r') ||
-      input.key === 'F5';
+    const isReload = (ctrl && input.key.toLowerCase() === 'r') || input.key === 'F5';
+    const isDevTools = input.key === 'F12' || (ctrl && input.shift && input.key.toLowerCase() === 'i');
     if (isHardReload) {
       mainWindow.webContents.reloadIgnoringCache();
       event.preventDefault();
     } else if (isReload) {
       mainWindow.webContents.reload();
       event.preventDefault();
+    } else if (isDevTools) {
+      mainWindow.webContents.toggleDevTools();
+      event.preventDefault();
     }
+  });
+
+  // 종료 시 클라이언트 sync 완료 위해 1.5초 대기
+  let allowClose = false;
+  mainWindow.on('close', (e) => {
+    if (allowClose) return;
+    e.preventDefault();
+    mainWindow.webContents.executeJavaScript(
+      'window.dispatchEvent(new Event("beforeunload"))'
+    ).catch(() => {});
+    setTimeout(() => { allowClose = true; mainWindow.close(); }, 1500);
   });
 
   mainWindow.loadURL(GAME_URL);
