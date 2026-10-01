@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronApi', {
 // 미니멀 타이틀바 — 18px 얇은 띠 + 작은 닫기/최소화 버튼만 (텍스트/로고 없음)
 // 드래그는 좌측 90% 영역, 우측 60px만 버튼 영역
 window.addEventListener('DOMContentLoaded', () => {
+  document.documentElement.classList.add('electron');   // 게임이 타이틀바 18px 만큼 높이 보정
   const bar = document.createElement('div');
   bar.id = '__electron-titlebar';
   bar.style.cssText = `
