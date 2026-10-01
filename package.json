@@ -1,6 +1,6 @@
 {
   "name": "idle-quest-app",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "ETERNAL IDLE 데스크탑 앱 (jopo.kr) — 작은 창으로 띄워두는 방치형 RPG",
   "main": "main.js",
   "author": "JOPO",

@@ -194,7 +194,7 @@ function createTray() {
   catch (e) { icon = nativeImage.createEmpty(); }
 
   tray = new Tray(icon);
-  tray.setToolTip(APP_TITLE);
+  tray.setToolTip(APP_TITLE + ' v' + app.getVersion());
   buildTrayMenu();
   tray.on('click', () => {
     if (mainWindow) {
@@ -206,6 +206,8 @@ function createTray() {
 function buildTrayMenu() {
   if (!tray) return;
   const contextMenu = Menu.buildFromTemplate([
+    { label: '버전 ' + app.getVersion(), enabled: false },
+    { type: 'separator' },
     { label: '게임 열기', click: () => { if (mainWindow) mainWindow.show(); } },
     { label: '새로고침 (Ctrl+R)', accelerator: 'CmdOrCtrl+R',
       click: () => { if (mainWindow) mainWindow.webContents.reload(); } },
