@@ -71,8 +71,8 @@ function createWindow() {
     ...(Number.isFinite(winState.x) ? { x: winState.x, y: winState.y } : {}),
     alwaysOnTop: !!winState.alwaysOnTop,
     title: APP_TITLE,
-    minWidth: 320,
-    minHeight: 560,
+    minWidth: 200,                 // 작게 줄이면 화면 전체가 같은 비율로 축소됨 (fitZoom)
+    minHeight: 340,
     resizable: true,
     useContentSize: true,
     frame: false,                  // 디스코드처럼 frameless
@@ -97,6 +97,11 @@ function createWindow() {
     const isReload = (ctrl && input.key.toLowerCase() === 'r') || input.key === 'F5';
     const isDevTools = input.key === 'F12' || input.code === 'F12'
                        || (ctrl && input.shift && input.key.toLowerCase() === 'i');
+    if (ctrl && input.key === '0') {   // 기본 크기(390×800)로 되돌리기
+      mainWindow.setContentSize(WIN_W, WIN_H);
+      event.preventDefault();
+      return;
+    }
     if (ctrl && input.shift && input.key.toLowerCase() === 't') {   // 항상 위 토글
       setAlwaysOnTop(!mainWindow.isAlwaysOnTop());
       event.preventDefault();
@@ -133,6 +138,17 @@ function createWindow() {
   });
   mainWindow.on('moved', scheduleSaveState);
   mainWindow.on('resized', scheduleSaveState);
+
+  // 창 크기에 맞춰 게임 화면 전체를 확대/축소 — 기본 390×800 이 100%, 줄이면 그대로 작아짐
+  function fitZoom() {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    const [w, h] = mainWindow.getContentSize();
+    const z = Math.max(0.45, Math.min(1.6, Math.min(w / WIN_W, h / WIN_H)));
+    mainWindow.webContents.setZoomFactor(z);
+  }
+  mainWindow.on('resize', fitZoom);
+  mainWindow.webContents.on('did-finish-load', fitZoom);
+  mainWindow.webContents.on('did-navigate-in-page', fitZoom);
 
   // 시작 시 SW + 캐시 강제 비움 (옛 SW가 jsx 가로채던 문제 영구 해결)
   const session = mainWindow.webContents.session;
